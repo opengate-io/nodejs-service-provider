@@ -12,13 +12,78 @@ services:
       context: ./
     environment:
       - LOG_LEVEL=debug
+      - KAFKA_ZOOKEEPER_HOST=kafka-broker:2181
+      - KAFKA_MESSAGES_TOPIC=debug-delivery-topic
+      - KAFKA_MESSAGES_GROUP=debug-delivery-group
+      - NODEJS_SERVICE_ENABLED=YES
+      - NODEJS_SERVICE_PROVIDER=DEBUG
+    depends_on:
+      kafka-broker:
+        condition: service_healthy
     ports:
      - 8000:8000
     volumes:
-      - ./models:/opt/micro-service/models
-      - ./controllers:/opt/micro-service/controllers
+      - ./models:/opt/service-provider/models
+      - ./controllers:/opt/service-provider/controllers
     healthcheck:
       test: ["CMD-SHELL", "curl -I -s -L http://127.0.0.1:8000 || exit 1"]
       interval: 5s
       retries: 10
     restart: always
+  cassandra-database:
+    build:
+      context: ./services/cassandra-database
+    ports:
+     - 9042:9042
+    healthcheck:
+      test: ["CMD-SHELL", "netstat -an | grep 9042 | grep -i listen || exit 1"]
+      interval: 5s
+      retries: 10
+    restart: always
+  cassandra-migrations:
+    build:
+      context: ./services/cassandra-cqlsh
+    depends_on:
+      cassandra-database:
+        condition: service_healthy
+    command: cqlsh --file=/opt/cassandra-database/create-tables.cql cassandra-database 9042
+    volumes:
+      - ./services/cassandra-database:/opt/cassandra-database
+  cassandra-admin:
+    build:
+      context: ./services/cassandra-admin
+      args:
+        - "CASSANDRA_HOST_PRIMARY=cassandra-database"
+        - "CASSANDRA_HOST_SECONDARY=10.0.75.1"
+    depends_on:
+      cassandra-database:
+        condition: service_healthy
+    ports:
+     - 8088:8088
+    restart: always
+  kafka-broker:
+    build: 
+      context: ./services/kafka-broker
+    environment:
+      - ADVERTISED_HOST=kafka-broker
+      - ADVERTISED_PORT=9092
+    ports:
+      - 9092:9092
+      - 2181:2181
+    healthcheck:
+      test: ["CMD-SHELL", "netstat -an | grep 9092 | grep -i listen || exit 1"]
+      interval: 5s
+      retries: 10
+    restart: always
+  kafka-create-topics:
+    build:
+      context: ./services/kafka-broker
+    depends_on:
+      kafka-broker:
+        condition: service_healthy
+    environment:
+      - ADVERTISED_HOST=kafka-broker
+      - ADVERTISED_PORT=9092
+      - ZOOKEEPER_HOST=kafka-broker
+      - CREATE_TOPICS=debug-delivery-topic:10:1
+    command: bash -c "create-topics.sh"

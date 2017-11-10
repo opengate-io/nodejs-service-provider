@@ -47,7 +47,7 @@ function CollectorHandler() {
  * Takes a measurement of CollectorHandler state, stores in history, and notifies listeners.
  */
 CollectorHandler.prototype.sendMessagesToServiceProvider = function (message) {
-    if (process.env.MESSAGE_SERVICE_ENABLED === 'YES' && message) {
+    if (process.env.NODEJS_SERVICE_ENABLED === 'YES' && message) {
         log.debug('deliverMessage:', message);
         serviceProvider.deliverMessage(message, (err, response) => {
             if (!err) {

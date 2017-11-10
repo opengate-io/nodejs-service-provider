@@ -168,7 +168,7 @@ definitions:
         description: The link value in string or an array
       message:
         type: object
-        example: 'You have just done something that need to track into database'
+        example: You have just done something that need to track into database
         description: The text message to be sent to links at a specific provider
       reference_id:
         type: string
@@ -227,7 +227,7 @@ definitions:
         description: The message links of the fetched tracking result
       message:
         type: object
-        example: 'You have just done something that need to track into database'
+        example: You have just done something that need to track into database
         description: The message object to be perform at a specific provider
       reference_id:
         type: string

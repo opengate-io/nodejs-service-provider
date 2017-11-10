@@ -1,6 +1,4 @@
 'use strict';
-var sendmail = require('sendmail')({ silent: true });
-var sanitizeHtml = require('sanitize-html');
 var Log = require('timestamp-log');
 var log = new Log(process.env.LOG_LEVEL);
 /**

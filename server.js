@@ -24,7 +24,7 @@ const swaggerDocument = require('./config/swagger.json');
 App.use('/docs/api', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 App.use(Swaggerize({
     api: Path.resolve('./config/swagger.yaml'),
-    handlers: Path.resolve('./controllers')
+    handlers: Path.resolve('controllers')
 }));
 App.use(function (err, req, res, next) {
     log.error('MessageServiceCollector:', err);
