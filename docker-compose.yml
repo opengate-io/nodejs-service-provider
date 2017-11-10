@@ -1,0 +1,24 @@
+version: '2.1'
+services:
+  flash-login:
+    #logging:
+    #  driver: awslogs
+    #  options:
+    #    awslogs-region: ap-southeast-1
+    #    awslogs-group: debug-service-provider
+    #    awslogs-create-group: 'true'
+    #    awslogs-multiline-pattern: '(INFO|DEBUG|ERROR|WARNNING)'
+    build:
+      context: ./
+    environment:
+      - LOG_LEVEL=debug
+    ports:
+     - 8000:8000
+    volumes:
+      - ./models:/opt/micro-service/models
+      - ./controllers:/opt/micro-service/controllers
+    healthcheck:
+      test: ["CMD-SHELL", "curl -I -s -L http://127.0.0.1:8000 || exit 1"]
+      interval: 5s
+      retries: 10
+    restart: always

@@ -1,0 +1,251 @@
+swagger: '2.0'
+info:
+  version: 0.0.1
+  title: nodejs-service-provider
+host: 'localhost:8000'
+basePath: /
+schemes:
+  - http
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  '/messages/{id}':
+    x-swagger-router-controller: Nodejs Service Provier
+    get:
+      description: Get the status of a sending message by message_id.
+      operationId: getMessageById
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/MessageId'
+        - $ref: '#/parameters/ReferenceId'
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/MessageResponse'
+        default:
+          description: Error Occured
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+    put:
+      description: Rollback a text message to sending queue again.
+      operationId: rollbackMessageById
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/MessageId'
+        - $ref: '#/parameters/RollbackParameter'
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/MessageResponse'
+        default:
+          description: Error Occured
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+  /messages:
+    x-swagger-router-controller: Nodejs Service Provier
+    get:
+      description: Get the list of sending messages by multiple params.
+      operationId: getMessageByParams
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/MessageStatus'
+        - $ref: '#/parameters/MessageLink'
+        - $ref: '#/parameters/MessageTag'
+        - $ref: '#/parameters/MessageStart'
+        - $ref: '#/parameters/MessageEnd'
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/MessageResponse'
+        default:
+          description: Error Occured
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+    post:
+      description: Request to send a message for doing something.
+      operationId: sendServiceMessage
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: The object description of the text message.
+          required: true
+          schema:
+            $ref: '#/definitions/MessageRequest'
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/ResultResponse'
+        default:
+          description: Error Occured
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+  /swagger:
+    x-swagger-pipe: swagger_raw
+parameters:
+  MessageId:
+    name: id
+    in: path
+    type: string
+    description: The message id to receive the message response.
+    required: true
+  ReferenceId:
+    type: string
+    name: reference_id
+    in: query
+    description: The reference id to receive the message response.
+    required: true
+  RollbackParameter:
+    name: body
+    in: body
+    description: The parameters to rollback the message.
+    required: true
+    schema:
+      $ref: '#/definitions/RollbackRequest'
+  MessageStatus:
+    name: status
+    in: query
+    description: The status of messages to retrieve.
+    required: false
+    type: string
+  MessageLink:
+    name: link
+    in: query
+    description: The specific link of message to lookup.
+    required: false
+    type: string
+  MessageTag:
+    name: tag
+    in: query
+    description: The specific tag element of message to lookup.
+    required: false
+    type: string
+  MessageStart:
+    name: start
+    in: query
+    description: 'The start date/time to receive (yyyy-mm-dd HH:mm:ss).'
+    required: false
+    type: string
+    format: date-time
+  MessageEnd:
+    name: end
+    in: query
+    description: 'The end date/time to receive (yyyy-mm-dd HH:mm:ss).'
+    required: false
+    type: string
+    format: date-time
+definitions:
+  MessageRequest:
+    required:
+      - links
+      - message
+      - reference_id
+    properties:
+      links:
+        type: string
+        example: data_sample_1|data_sample_2|data_sample_3
+        description: The link value in string or an array
+      message:
+        type: object
+        example: 'You have just done something that need to track into database'
+        description: The text message to be sent to links at a specific provider
+      reference_id:
+        type: string
+        example: 6aa5bc34-7493-483b-bb0c-ef5504f94eeb
+        description: The reference Id that is linked to application subject
+  RollbackRequest:
+    required:
+      - reference_id
+    properties:
+      reference_id:
+        type: string
+        example: 6aa5bc34-7493-483b-bb0c-ef5504f94eeb
+        description: The reference Id that is linked to application subject
+  ResultResponse:
+    required:
+      - message_id
+    properties:
+      message_id:
+        type: string
+        example: 9487a582-35ec-46be-a365-7ed167e0b8da
+        description: The message Id of the fetched tracking result
+      reference_id:
+        type: string
+        example: 6aa5bc34-7493-483b-bb0c-ef5504f94eeb
+        description: The reference Id that is linked to application subject
+      status:
+        type: string
+        example: CREATED|SENT|VERIFIED
+  MessageResponse:
+    required:
+      - message_id
+    properties:
+      message_id:
+        type: string
+        example: 9487a582-35ec-46be-a365-7ed167e0b8da
+        description: The message Id of the fetched tracking result
+      status:
+        type: string
+        example: CREATED|SENT|VERIFIED
+        description: The message status of the fetched tracking result
+      tags:
+        type: array
+        items:
+          type: string
+        example:
+          - 'provider:DEBUG'
+          - 'action:SOME_ACTION'
+        description: The message tags of the fetched tracking result
+      links:
+        type: array
+        items:
+          type: string
+        example:
+          - data_sample_1
+          - data_sample_2
+        description: The message links of the fetched tracking result
+      message:
+        type: object
+        example: 'You have just done something that need to track into database'
+        description: The message object to be perform at a specific provider
+      reference_id:
+        type: string
+        example: 6aa5bc34-7493-483b-bb0c-ef5504f94eeb
+        description: The reference Id that is linked to application subject
+      created_at:
+        type: string
+        example: '2018-01-22 00:00:00'
+        description: The message created date of the fetched tracking result
+      delivered_at:
+        type: string
+        example: '2017-11-02 13:54:00'
+        description: The message delivered date of the fetched tracking result
+  ErrorResponse:
+    required:
+      - code
+    properties:
+      code:
+        type: string
+      message:
+        type: string
