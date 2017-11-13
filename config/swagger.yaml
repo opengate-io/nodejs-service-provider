@@ -13,7 +13,7 @@ produces:
   - application/json
 paths:
   '/messages/{id}':
-    x-swagger-router-controller: Nodejs Service Provier
+    x-swagger-router-controller: Nodejs Service Provider
     get:
       description: Get the status of a sending message by message_id.
       operationId: getMessageById
@@ -53,7 +53,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
   /messages:
-    x-swagger-router-controller: Nodejs Service Provier
+    x-swagger-router-controller: Nodejs Service Provider
     get:
       description: Get the list of sending messages by multiple params.
       operationId: getMessageByParams
