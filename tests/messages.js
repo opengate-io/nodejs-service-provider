@@ -27,7 +27,7 @@ Test('/messages', function (t) {
         /**
          * summary: 
          * description: Get the list of sending messages by multiple params.
-         * parameters: status, link, tag, start, end
+         * parameters: status, owner, tag, start, end
          * produces: application/json
          * responses: 200, default
          */

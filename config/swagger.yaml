@@ -130,9 +130,9 @@ parameters:
     required: false
     type: string
   MessageLink:
-    name: link
+    name: owner
     in: query
-    description: The specific link of message to lookup.
+    description: The specific owner of message to lookup.
     required: false
     type: string
   MessageTag:
@@ -158,18 +158,18 @@ parameters:
 definitions:
   MessageRequest:
     required:
-      - links
+      - owners
       - message
       - reference_id
     properties:
-      links:
+      owners:
         type: string
         example: data_sample_1|data_sample_2|data_sample_3
-        description: The link value in string or an array
+        description: The owner value in string or an array
       message:
         type: object
         example: You have just done something that need to track into database
-        description: The text message to be sent to links at a specific provider
+        description: The text message to be sent to owners at a specific provider
       reference_id:
         type: string
         example: 6aa5bc34-7493-483b-bb0c-ef5504f94eeb
@@ -217,14 +217,14 @@ definitions:
           - 'provider:DEBUG'
           - 'action:SOME_ACTION'
         description: The message tags of the fetched tracking result
-      links:
+      owners:
         type: array
         items:
           type: string
         example:
           - data_sample_1
           - data_sample_2
-        description: The message links of the fetched tracking result
+        description: The message owners of the fetched tracking result
       message:
         type: object
         example: You have just done something that need to track into database

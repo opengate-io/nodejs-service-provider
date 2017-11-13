@@ -11,24 +11,24 @@ module.exports = {
     /**
      * summary: [Public] Connector exposed method.
      * description: Publish a message into Kafka.
-     * parameters: messageLinks, messageObject, referenceId, tags
+     * parameters: messageOwners, messageObject, referenceId, tags
      * produces: application/json
      * responses: callback(error, response)
      * operationId: sendMessage
      */
-    sendMessage: function (messageLinks, messageObject, referenceId, tags, callback) {
+    sendMessage: function (messageOwners, messageObject, referenceId, tags, callback) {
         var kafkaZookeeperString = process.env.KAFKA_ZOOKEEPER_HOST;
         var client = new kafka.Client(kafkaZookeeperString + '/');
         var producer = new kafka.HighLevelProducer(client);
         producer.on('ready', function () {
-            database.createMessage(messageLinks, messageObject, referenceId, tags, function (err, result) {
+            database.createMessage(messageOwners, messageObject, referenceId, tags, function (err, result) {
                 if (!err) {
                     var payloads = [{
                         topic: process.env.KAFKA_MESSAGES_TOPIC,
                         messages: JSON.stringify({
                             message_id: result.message_id,
                             reference_id: result.reference_id,
-                            links: messageLinks,
+                            owners: messageOwners,
                             message: messageObject
                         })
                     }];
@@ -60,12 +60,12 @@ module.exports = {
     /**
      * summary: [Public] Connector exposed method.
      * description: Publish a message into Kafka.
-     * parameters: messageLinks, messageObject, referenceId
+     * parameters: messageOwners, messageObject, referenceId
      * produces: application/json
      * responses: callback(error, response)
      * operationId: sendMessage
      */
-    rollbackMessage: function (messageId, messageLinks, messageObject, referenceId, callback) {
+    rollbackMessage: function (messageId, messageOwners, messageObject, referenceId, callback) {
         var kafkaZookeeperString = process.env.KAFKA_ZOOKEEPER_HOST;
         var client = new kafka.Client(kafkaZookeeperString + '/');
         var producer = new kafka.HighLevelProducer(client);
@@ -77,7 +77,7 @@ module.exports = {
                         messages: JSON.stringify({
                             message_id: result.message_id,
                             reference_id: result.reference_id,
-                            links: messageLinks,
+                            owners: messageOwners,
                             message: messageObject
                         }),
                         partition: parseInt(process.env.KAFKA_MESSAGES_PARTITION)

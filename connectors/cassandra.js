@@ -8,17 +8,17 @@ const cassandraTrackingTable = process.env.CASSANDRA_TRACKING_TABLE || 'samples.
 const cassandraKeyspaceName = process.env.CASSANDRA_KEYSPACE_NAME || 'samples'
 
 const buildQueriesFromParams = (query) => {
-    let builtQueries = 'SELECT id, status, tags, links, object, reference_id, created_at, delivered_at FROM ' + cassandraTrackingTable + ' WHERE';
+    let builtQueries = 'SELECT id, status, tags, owners, object, reference_id, created_at, delivered_at FROM ' + cassandraTrackingTable + ' WHERE';
     let builtParams = [];
     if (query.status) {
         builtQueries += builtParams.length > 0 ? ' AND ' : ' ';
         builtQueries += 'status = ?'
         builtParams.push(query.status);
     }
-    if (query.link) {
+    if (query.owner) {
         builtQueries += builtParams.length > 0 ? ' AND ' : ' ';
-        builtQueries += 'links CONTAINS ?'
-        builtParams.push(query.link);
+        builtQueries += 'owners CONTAINS ?'
+        builtParams.push(query.owner);
     }
     if (query.tag) {
         builtQueries += builtParams.length > 0 ? ' AND ' : ' ';
@@ -47,21 +47,21 @@ module.exports = {
     /**
      * summary: [Public] Connector exposed method.
      * description: Record a message into database.
-     * parameters: messagelinks, messageObject, referenceId, tags
+     * parameters: messageOwners, messageObject, referenceId, tags
      * produces: application/json
      * responses: callback(error, response)
      * operationId: createMessage
      */
-    createMessage: function (messagelinks, messageObject, referenceId, tags, callback) {
+    createMessage: function (messageOwners, messageObject, referenceId, tags, callback) {
         let messageId = Guid.raw();
         let messageStatus = 'CREATED';
         let messageCreatedAt = new Date().toISOString();
         let messageTags = tags ? tags: [];
-        let links = Array.isArray(messagelinks) ? messagelinks : [messagelinks];
+        let owners = Array.isArray(messageOwners) ? messageOwners : [messageOwners];
         const client = new cassandra.Client({ contactPoints: cassandraContactPoints, keyspace: cassandraKeyspaceName });
-        const query = 'INSERT INTO ' + cassandraTrackingTable + ' (id, status, tags, links, object, reference_id, created_at, delivered_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+        const query = 'INSERT INTO ' + cassandraTrackingTable + ' (id, status, tags, owners, object, reference_id, created_at, delivered_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
         messageTags.push('provider:' + process.env.MESSAGE_SERVICE_PROVIDER);
-        const params = [messageId, messageStatus, messageTags, links, messageObject, referenceId, messageCreatedAt, null];
+        const params = [messageId, messageStatus, messageTags, owners, messageObject, referenceId, messageCreatedAt, null];
         client.execute(query, params, { prepare: true }, (err, data) => {
             if (!err) {
                 callback(null, {
@@ -120,7 +120,7 @@ module.exports = {
     getMessageById: function (messageId, referenceId, callback) {
         let messageUpdatedAt = new Date().toISOString();
         const client = new cassandra.Client({ contactPoints: cassandraContactPoints, keyspace: cassandraKeyspaceName });
-        const query = 'SELECT id, status, tags, links, object, reference_id, created_at, delivered_at FROM ' + cassandraTrackingTable + ' WHERE id=? AND reference_id=?';
+        const query = 'SELECT id, status, tags, owners, object, reference_id, created_at, delivered_at FROM ' + cassandraTrackingTable + ' WHERE id=? AND reference_id=?';
         const params = [messageId, referenceId];
         client.execute(query, params, { prepare: true }, (err, data) => {
             if (!err) {

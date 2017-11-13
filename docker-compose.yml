@@ -1,6 +1,6 @@
 version: '2.1'
 services:
-  flash-login:
+  echo-service:
     #logging:
     #  driver: awslogs
     #  options:
@@ -13,10 +13,10 @@ services:
     environment:
       - LOG_LEVEL=debug
       - KAFKA_ZOOKEEPER_HOST=kafka-broker:2181
-      - KAFKA_MESSAGES_TOPIC=debug-delivery-topic
-      - KAFKA_MESSAGES_GROUP=debug-delivery-group
+      - KAFKA_MESSAGES_TOPIC=echo-delivery-topic
+      - KAFKA_MESSAGES_GROUP=echo-delivery-group
       - NODEJS_SERVICE_ENABLED=YES
-      - NODEJS_SERVICE_PROVIDER=DEBUG
+      - NODEJS_SERVICE_PROVIDER=ECHO
     depends_on:
       kafka-broker:
         condition: service_healthy
@@ -85,5 +85,5 @@ services:
       - ADVERTISED_HOST=kafka-broker
       - ADVERTISED_PORT=9092
       - ZOOKEEPER_HOST=kafka-broker
-      - CREATE_TOPICS=debug-delivery-topic:10:1
+      - CREATE_TOPICS=echo-delivery-topic:2:1
     command: bash -c "create-topics.sh"
